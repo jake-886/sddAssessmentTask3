@@ -17,7 +17,7 @@ platformColor = Color(255, 255, 0)
 platformOffset = 100
 platformSize = Vector2(screenWidth * 0.1, screenHeight * 0.01)
 gravity = round(-screenHeight * 1.5)
-terminalVelocity = screenHeight * 2
+terminalVelocity = screenHeight
 characterRadius = screenHeight * 0.05
 characterImage = pygame.transform.scale(pygame.image.load("characterImage.png"), Vector2(characterRadius, characterRadius))
 
@@ -71,9 +71,9 @@ def gameHandler(dynamicVariables):
 
     dynamicVariables["score"] = round(-dynamicVariables["character"].position.y)
     
-    if dynamicVariables["pressedKeys"][constants.K_a]:
+    if dynamicVariables["pressedKeys"][constants.K_a] or dynamicVariables["pressedKeys"][constants.K_LEFT]:
         movementVector -= 1
-    if dynamicVariables["pressedKeys"][constants.K_d]:
+    if dynamicVariables["pressedKeys"][constants.K_d] or dynamicVariables["pressedKeys"][constants.K_RIGHT]:
         movementVector += 1
 
     dynamicVariables["zoneVelocity"] = 0.1 * terminalVelocity - dynamicVariables["character"].velocity.y * 0.75 + (dynamicVariables["score"] * 0.001)
@@ -95,7 +95,7 @@ def gameHandler(dynamicVariables):
         if dynamicVariables["character"].velocity.y < 0:
             if dynamicVariables["character"].position.x < platformPosition.x + platformSize.x / 2 and dynamicVariables["character"].position.x > platformPosition.x - platformSize.x / 2:
                 if abs(dynamicVariables["character"].position.y - platformPosition.y) - characterRadius / 2 < characterRadius / 2 and dynamicVariables["character"].position.y > platformPosition.y:
-                  dynamicVariables["character"].velocity.y = terminalVelocity * 0.25
+                  dynamicVariables["character"].velocity.y = terminalVelocity * 0.5
 
         relativePlatformHeight = dynamicVariables["character"].position.y - platformPosition.y
         platformRect = pygame.Rect(0, 0, platformSize.x, platformSize.y)
@@ -150,13 +150,37 @@ def deadHandler(dynamicVariables):
             dynamicVariables["character"] = character()
     return dynamicVariables
 
+def settingsHandler(dynamicVariables):
+    screen.fill(Color(255, 0, 0))
+
+    text1 = "Settings"
+    titleFont = pygame.font.SysFont("Arial", round(screenWidth * 0.05))
+    titleText = titleFont.render(text1, False, Color(0, 0, 0))
+    titleRect = pygame.Rect(0, 0, titleFont.size(text1)[0], titleFont.size(text1)[1])
+    titleRect.center = Vector2(screenWidth * 0.5, screenHeight * 0.25)
+    screen.blit(titleText, titleRect)
+
+    restartButton = menuButton(Vector2(screenWidth * 0.2, screenHeight * 0.1), Vector2(screenWidth / 2, screenHeight / 2), Color(255, 255, 255), "menu", "MENU", Color(0,0,0))
+
+    if dynamicVariables["mouseClicked"] == True:
+        distanceX = abs(dynamicVariables["mousePosition"][0] - restartButton.center.x)
+        distanceY = abs(dynamicVariables["mousePosition"][1] - restartButton.center.y)
+
+        if distanceX < restartButton.size.x / 2 and distanceY < restartButton.size.y / 2:
+            dynamicVariables = dict(defaultVariables)
+            dynamicVariables["character"] = character()
+    return dynamicVariables
+
 def menuHandler(dynamicVariables):
     screen.fill(Color(255, 0, 0))
 
     def play():
         dynamicVariables["gameState"] = "game"
 
-    menuFunctions = {"play": play}
+    def settings():
+        dynamicVariables["gameState"] = "settings"
+
+    menuFunctions = {"play": play, "settings": settings}
 
     text1 = "GAME NAME"
     titleFont = pygame.font.SysFont("Arial", round(screenWidth * 0.05))
@@ -169,7 +193,7 @@ def menuHandler(dynamicVariables):
     settingsButton = menuButton(Vector2(screenWidth * 0.2, screenHeight * 0.1), Vector2(screenWidth * 0.5, screenHeight * 0.625), Color(255, 255, 255), "settings", "SETTINGS", Color(0,0,0))
     helpButton = menuButton(Vector2(screenWidth * 0.2, screenHeight * 0.1), Vector2(screenWidth * 0.5, screenHeight * 0.75), Color(255, 255, 255), "help", "HELP", Color(0,0,0))
 
-    menuButtons = [playButton]
+    menuButtons = [playButton, settingsButton]
 
     if dynamicVariables["mouseClicked"] == True:
         for button in menuButtons:
@@ -183,7 +207,7 @@ def menuHandler(dynamicVariables):
     return dynamicVariables
 
 def main():
-    gameFunctions = {"menu": menuHandler, "game": gameHandler, "dead": deadHandler}
+    gameFunctions = {"menu": menuHandler, "game": gameHandler, "dead": deadHandler, "settings": settingsHandler}
     dynamicVariables = dict(defaultVariables)
     running = True
     
