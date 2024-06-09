@@ -1,8 +1,11 @@
+# Jake Norton / SDD Assignment 3 / 2024
+
 import pygame
 from pygame.math import Vector2
 from pygame import Color
 import random
 from pygame import constants
+import textwrap
 
 pygame.init()
 screen = pygame.display.set_mode(Vector2(0, 0), pygame.FULLSCREEN)
@@ -63,7 +66,7 @@ def generatePlatforms(currentHeight):
 
     return platforms
 
-def gameHandler(dynamicVariables):
+def gameHandler(dynamicVariables): #updates all game variables and renders game
     screen.fill(Color(0, 100, 255))
 
     platforms = generatePlatforms(round(dynamicVariables["character"].position.y, -2))
@@ -122,7 +125,7 @@ def gameHandler(dynamicVariables):
 
     return dynamicVariables
 
-def deadHandler(dynamicVariables):
+def deadHandler(dynamicVariables): # renders the death screen
     screen.fill(Color(255, 0, 0))
 
     text1 = "You Died!"
@@ -150,7 +153,7 @@ def deadHandler(dynamicVariables):
             dynamicVariables["character"] = character()
     return dynamicVariables
 
-def settingsHandler(dynamicVariables):
+def settingsHandler(dynamicVariables): # renders the settings screen
     screen.fill(Color(255, 0, 0))
 
     text1 = "Settings"
@@ -171,7 +174,46 @@ def settingsHandler(dynamicVariables):
             dynamicVariables["character"] = character()
     return dynamicVariables
 
-def menuHandler(dynamicVariables):
+def helpHandler(dynamicVariables): # renders the help screen
+    screen.fill(Color(255, 0, 0))
+
+    text1 = "Help"
+    titleFont = pygame.font.SysFont("Arial", round(screenWidth * 0.05))
+    titleText = titleFont.render(text1, False, Color(0, 0, 0))
+    titleRect = pygame.Rect(0, 0, titleFont.size(text1)[0], titleFont.size(text1)[1])
+    titleRect.center = Vector2(screenWidth * 0.5, screenHeight * 0.25)
+    screen.blit(titleText, titleRect)
+    text2 = "The goal of this game is to escape the red zone by falling."
+    titleFont2 = pygame.font.SysFont("Arial", round(screenWidth * 0.03))
+    titleText2 = titleFont2.render(text2, False, Color(0, 0, 0))
+    titleRect2 = pygame.Rect(0, 0, titleFont2.size(text2)[0], titleFont2.size(text2)[1])
+    titleRect2.center = Vector2(screenWidth * 0.5, screenHeight * 0.35)
+    screen.blit(titleText2, titleRect2)
+    text2 = "Control the character by pressing A/D."
+    titleFont2 = pygame.font.SysFont("Arial", round(screenWidth * 0.03))
+    titleText2 = titleFont2.render(text2, False, Color(0, 0, 0))
+    titleRect2 = pygame.Rect(0, 0, titleFont2.size(text2)[0], titleFont2.size(text2)[1])
+    titleRect2.center = Vector2(screenWidth * 0.5, screenHeight * 0.45)
+    screen.blit(titleText2, titleRect2)
+    text2 = "Get the highest score by descending as far as possible."
+    titleFont2 = pygame.font.SysFont("Arial", round(screenWidth * 0.03))
+    titleText2 = titleFont2.render(text2, False, Color(0, 0, 0))
+    titleRect2 = pygame.Rect(0, 0, titleFont2.size(text2)[0], titleFont2.size(text2)[1])
+    titleRect2.center = Vector2(screenWidth * 0.5, screenHeight * 0.55)
+    screen.blit(titleText2, titleRect2)
+
+    restartButton = menuButton(Vector2(screenWidth * 0.2, screenHeight * 0.1), Vector2(screenWidth / 2, screenHeight * 0.75), Color(255, 255, 255), "menu", "MENU", Color(0,0,0))
+
+    if dynamicVariables["mouseClicked"] == True:
+        distanceX = abs(dynamicVariables["mousePosition"][0] - restartButton.center.x)
+        distanceY = abs(dynamicVariables["mousePosition"][1] - restartButton.center.y)
+
+        if distanceX < restartButton.size.x / 2 and distanceY < restartButton.size.y / 2:
+            dynamicVariables = dict(defaultVariables)
+            dynamicVariables["character"] = character()
+    return dynamicVariables
+
+def menuHandler(dynamicVariables): #main loop
     screen.fill(Color(255, 0, 0))
 
     def play():
@@ -180,7 +222,10 @@ def menuHandler(dynamicVariables):
     def settings():
         dynamicVariables["gameState"] = "settings"
 
-    menuFunctions = {"play": play, "settings": settings}
+    def help():
+        dynamicVariables["gameState"] = "help"
+
+    menuFunctions = {"play": play, "settings": settings, "help": help}
 
     text1 = "GAME NAME"
     titleFont = pygame.font.SysFont("Arial", round(screenWidth * 0.05))
@@ -193,9 +238,9 @@ def menuHandler(dynamicVariables):
     settingsButton = menuButton(Vector2(screenWidth * 0.2, screenHeight * 0.1), Vector2(screenWidth * 0.5, screenHeight * 0.625), Color(255, 255, 255), "settings", "SETTINGS", Color(0,0,0))
     helpButton = menuButton(Vector2(screenWidth * 0.2, screenHeight * 0.1), Vector2(screenWidth * 0.5, screenHeight * 0.75), Color(255, 255, 255), "help", "HELP", Color(0,0,0))
 
-    menuButtons = [playButton, settingsButton]
+    menuButtons = [playButton, settingsButton, helpButton]
 
-    if dynamicVariables["mouseClicked"] == True:
+    if dynamicVariables["mouseClicked"] == True: #checks if buttons are clicked
         for button in menuButtons:
             distanceX = abs(dynamicVariables["mousePosition"][0] - button.center.x)
             distanceY = abs(dynamicVariables["mousePosition"][1] - button.center.y)
@@ -207,7 +252,7 @@ def menuHandler(dynamicVariables):
     return dynamicVariables
 
 def main():
-    gameFunctions = {"menu": menuHandler, "game": gameHandler, "dead": deadHandler, "settings": settingsHandler}
+    gameFunctions = {"menu": menuHandler, "game": gameHandler, "dead": deadHandler, "settings": settingsHandler, "help": helpHandler}
     dynamicVariables = dict(defaultVariables)
     running = True
     
